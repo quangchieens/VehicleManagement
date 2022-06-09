@@ -8,7 +8,7 @@ namespace VehicleManagement.Services
         public void ShowMenu();
         public Type GetVehicleType();
         public string GetSearchType();
-        public string GetVehicleId();
+        public string GetVehicleId(string action);
         public string GetShowType();
     }
 }

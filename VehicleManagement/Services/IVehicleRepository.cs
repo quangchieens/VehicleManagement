@@ -7,7 +7,7 @@ namespace VehicleManagement.Services
     {
         public void LoadData();
         public void AddVehicle(Type vehicleType);
-        public bool UpdateVehicle(Guid id);
+        public bool UpdateVehicle(string id);
         public void DeleteVehicle(string id);
         public void SearchVehicle(string searchType);
         public void ShowVehicleList(string showType);

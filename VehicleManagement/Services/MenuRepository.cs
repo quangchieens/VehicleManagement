@@ -26,9 +26,9 @@ namespace VehicleManagement.Services
             throw new ArgumentNullException(nameof(choice));
         }
 
-        public string GetVehicleId()
+        public string GetVehicleId(string action)
         {
-            Console.Write("Input the id of the car you want to remove: ");
+            Console.Write($"Input the id of the car you want to {action}: ");
             return Console.ReadLine();
         }
 

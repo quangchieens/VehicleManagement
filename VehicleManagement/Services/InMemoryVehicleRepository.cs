@@ -153,6 +153,7 @@ namespace VehicleManagement.Services
 
         public void StoreData()
         {
+            //only append unoccurred instances
             var text = File.ReadAllText(filePath);
             var vehicles = _vehicles.Where(v => !text.Contains(v.Id.ToString()))
                                     .ToList();
@@ -163,9 +164,9 @@ namespace VehicleManagement.Services
             }
         }
 
-        public bool UpdateVehicle(Guid id)
+        public bool UpdateVehicle(string id)
         {
-            var vehicle = GetVehicle(id);
+            var vehicle = GetVehicle(Guid.Parse(id));
 
             if (vehicle is null)
             {
@@ -230,29 +231,11 @@ namespace VehicleManagement.Services
                 string[] words = line.Split('-');
                 if (words.Any(w => w.Trim() == "YearOfManufacture"))
                 {
-                    _vehicles.Add(new Car
-                    {
-                        Id = Guid.Parse(words[0]),
-                        Name = words[1],
-                        Color = Enum.Parse<Color>(words[2]),
-                        Price = decimal.Parse(words[3]),
-                        Brand = Enum.Parse<Brand>(words[4]),
-                        YearOfManufacture = int.Parse(words[5]),
-                        Type = Enum.Parse<CarType>(words[6])
-                    });
+                    _vehicles.AddCar(words);
                 }
                 else
                 {
-                    _vehicles.Add(new Motorbike
-                    {
-                        Id = Guid.Parse(words[0]),
-                        Name = words[1],
-                        Color = Enum.Parse<Color>(words[2]),
-                        Price = decimal.Parse(words[3]),
-                        Brand = Enum.Parse<Brand>(words[4]),
-                        Speed = int.Parse(words[5]),
-                        LicenseRequired = bool.Parse(words[6])
-                    });
+                    _vehicles.AddMotorbike(words);
                 }
             }
         }

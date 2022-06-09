@@ -27,8 +27,11 @@ namespace VehicleManagement
                         var vehicleType = menu.GetVehicleType();
                         repo.AddVehicle(vehicleType);
                         break;
+                    case 3:
+                        repo.UpdateVehicle(menu.GetVehicleId("update"));
+                        break;
                     case 4:
-                        repo.DeleteVehicle(menu.GetVehicleId());
+                        repo.DeleteVehicle(menu.GetVehicleId("remove"));
                         break;
                     case 5:
                         var searchType = menu.GetSearchType();
