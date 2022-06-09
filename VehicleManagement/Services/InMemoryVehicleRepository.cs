@@ -137,12 +137,18 @@ namespace VehicleManagement.Services
 
         private void ShowAllVehicle()
         {
-            var 
+            var text = File.ReadAllText(filePath);
+            Console.WriteLine(text);
         }
 
         private void ShowVehiclesDescending()
         {
+            var textToPrint = _vehicles.OrderByDescending(x => x.Price);
 
+            foreach (var line in textToPrint)
+            {
+                Console.WriteLine(line.ToString());
+            }
         }
 
         public void StoreData()

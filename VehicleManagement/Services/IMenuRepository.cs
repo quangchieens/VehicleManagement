@@ -6,9 +6,9 @@ namespace VehicleManagement.Services
     internal interface IMenuRepository
     {
         public void ShowMenu();
-        public Type AddVehicle();
-        public string SearchVehicle();
+        public Type GetVehicleType();
+        public string GetSearchType();
         public string GetVehicleId();
-        public string ShowVehicleList();
+        public string GetShowType();
     }
 }

@@ -10,7 +10,7 @@ namespace VehicleManagement.Services
 {
     internal class MenuRepository : IMenuRepository
     {
-        public Type AddVehicle()
+        public Type GetVehicleType()
         {
             Console.WriteLine("Is your vehicle a Car or a Motorbike? 0: Car, 1: Motorbike");
             var choice = int.Parse(Console.ReadLine());
@@ -32,7 +32,7 @@ namespace VehicleManagement.Services
             return Console.ReadLine();
         }
 
-        public string SearchVehicle()
+        public string GetSearchType()
         {
             Console.WriteLine("Do you want to search by name or you want to search by id?");
             string choice = Console.ReadLine();
@@ -57,7 +57,7 @@ namespace VehicleManagement.Services
             Console.WriteLine("7. Store data to file");
         }
 
-        public string ShowVehicleList()
+        public string GetShowType()
         {
             Console.WriteLine("6.1. Show all");
             Console.WriteLine("6.2. Show all (descending by price)");

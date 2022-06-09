@@ -24,15 +24,19 @@ namespace VehicleManagement
                         
                         break;
                     case 2:
-                        var vehicleType = menu.AddVehicle();
+                        var vehicleType = menu.GetVehicleType();
                         repo.AddVehicle(vehicleType);
                         break;
                     case 4:
                         repo.DeleteVehicle(menu.GetVehicleId());
                         break;
                     case 5:
-                        var searchType = menu.SearchVehicle();
+                        var searchType = menu.GetSearchType();
                         repo.SearchVehicle(searchType);
+                        break;
+                    case 6:
+                        var showType = menu.GetShowType();
+                        repo.ShowVehicleList(showType);
                         break;
                     case 7:
                         repo.StoreData();
