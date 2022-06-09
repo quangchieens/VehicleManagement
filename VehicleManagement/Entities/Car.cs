@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VehicleManagement.Entities.Enums;
 
-namespace VehicleManagement.Entities.VehicleTypes
+namespace VehicleManagement.Entities
 {
     internal class Car : Vehicle
     {
@@ -15,7 +15,7 @@ namespace VehicleManagement.Entities.VehicleTypes
         public CarType Type { get; set; }
         public override string ToString()
         {
-            return $"{Id,-40} - {Name,-7} - {Color,-7} - {Price, -15} - {Brand, -7} - {YearOfManufacture,-7} - {Type, -7} - {' ', -7} - {' ', -7}\n";
+            return $"{Id,-40} - {Name,-7} - {Color,-7} - {Price, -15} - {Brand.Name, -7} - {YearOfManufacture,-7} - {Type, -7} - {' ', -7} - {' ', -7}\n";
         }
     }
 }

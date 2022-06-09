@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VehicleManagement.Entities.VehicleTypes
+namespace VehicleManagement.Entities
 {
     internal class Motorbike : Vehicle
     {
@@ -14,7 +14,7 @@ namespace VehicleManagement.Entities.VehicleTypes
         public bool? LicenseRequired { get; set; }
         public override string ToString()
         {
-            return $"{Id,-40} - {Name,-7} - {Color,-7} - {Price,-15} - {Brand,-7} - {' ',-7} - {' ',-7} - {Speed,-7} - {LicenseRequired,-7}\n";
+            return $"{Id,-40} - {Name,-7} - {Color,-7} - {Price,-15} - {Brand.Name,-7} - {' ',-7} - {' ',-7} - {Speed,-7} - {LicenseRequired,-7}\n";
         }
         public void MakeSound()
         {

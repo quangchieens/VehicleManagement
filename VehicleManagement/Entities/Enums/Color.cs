@@ -2,7 +2,7 @@
 {
     enum Color
     {
-        Red,       
+        Red,
         Green,
         Blue,
         Undefined

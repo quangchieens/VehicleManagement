@@ -8,9 +8,10 @@ namespace VehicleManagement
     {
         static void Main(string[] args)
         {
-            string file = "vehicles.txt";
+            const string file = "vehicles.txt";
             IVehicleRepository repo = new InMemoryVehicleRepository(file);
-            IMenuRepository menu = new MenuRepository();
+            var IOVehicles = new IOVehicles();
+            var menu = new Menu();
             int choice;
 
             do
@@ -21,25 +22,26 @@ namespace VehicleManagement
                 switch (choice)
                 {
                     case 1:
-                        
+                        repo.LoadData();
                         break;
                     case 2:
-                        var vehicleType = menu.GetVehicleType();
-                        repo.AddVehicle(vehicleType);
+                        repo.AddVehicle();
                         break;
                     case 3:
-                        repo.UpdateVehicle(menu.GetVehicleId("update"));
+                        Guid idToUpdate = IOVehicles.GetId();
+                        repo.UpdateVehicle(idToUpdate);
                         break;
                     case 4:
-                        repo.DeleteVehicle(menu.GetVehicleId("remove"));
+                        Guid idToDelete = IOVehicles.GetId();
+                        repo.DeleteVehicle(idToDelete);
                         break;
                     case 5:
-                        var searchType = menu.GetSearchType();
-                        repo.SearchVehicle(searchType);
+                        menu.SearchVehicleSubmenu();
+                        repo.SearchVehicle();
                         break;
                     case 6:
-                        var showType = menu.GetShowType();
-                        repo.ShowVehicleList(showType);
+                        menu.ShowVehicleListSubmenu();
+                        repo.ShowVehicleList();
                         break;
                     case 7:
                         repo.StoreData();

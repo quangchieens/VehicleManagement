@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VehicleManagement.Entities;
 using VehicleManagement.Entities.Enums;
-using VehicleManagement.Entities.VehicleTypes;
 using VehicleManagement.Helpers;
 
 namespace VehicleManagement.Services
@@ -15,17 +11,26 @@ namespace VehicleManagement.Services
     internal class InMemoryVehicleRepository : IVehicleRepository
     {
         private readonly List<Vehicle> _vehicles;
-        private const string fileDirectory = @"C:\Users\quangchieens\source\repos\VehicleManagement\VehicleManagement\";
+        private readonly IBrandRepository _brandRepository;
+        private readonly IOVehicles _IOVehicles;
+        private readonly string fileDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.ToString() + "\\";
         private readonly string fileName;
         private readonly string filePath;
 
         public InMemoryVehicleRepository(string fileName)
         {
+
+            _brandRepository = new BrandRepository();
+            _brandRepository.AddBrand("Maybach");
+            _brandRepository.AddBrand("Ford");
+
             _vehicles = new List<Vehicle>()
             {
-                new Car() { Name = "Khoa", Brand = Brand.Maybach, Color = Color.Blue, Price = 234.234m, Type = CarType.Sport, YearOfManufacture = 2020 },
-                new Motorbike() { Name = "Chien", Brand = Brand.Ford, Color = Color.Red, Price = 23423414.32m, LicenseRequired = true, Speed = 220 }
+                new Car() { Name = "Khoa", Brand = _brandRepository.GetBrand("Maybach"), Color = Color.Blue, Price = 234.234m, Type = CarType.Sport, YearOfManufacture = 2020 },
+                new Motorbike() { Name = "Chien", Brand = _brandRepository.GetBrand("Ford"), Color = Color.Red, Price = 23423414.32m, LicenseRequired = true, Speed = 220 }
             };
+
+            _IOVehicles = new IOVehicles();
 
             this.fileName = fileName;
             this.filePath = fileDirectory + fileName;
@@ -36,58 +41,40 @@ namespace VehicleManagement.Services
             return _vehicles.FirstOrDefault(v => v.Id == id);
         }
 
-        public void AddVehicle(Type vehicleType)
+        public void AddVehicle()
         {
+            var vehicleType = _IOVehicles.GetVehicleType();
             if (vehicleType is null)
             {
-                throw new ArgumentNullException(nameof(vehicleType));
+                Console.WriteLine("You inputted something so wrong");
             }
 
-            if (vehicleType == typeof(Car))
+            if (vehicleType is "car")
             {
-                var car = new Car();
-                GetVehicleInput(car);
-
-                Console.WriteLine("Enter the year of manufacture: ");
-                car.YearOfManufacture = int.Parse(Console.ReadLine());
-
-                Console.WriteLine("Choose the car type: ");
-                if (!Enum.TryParse(Console.ReadLine(), out CarType carType))
-                {
-                    throw new ArgumentNullException(nameof(carType));
-                }
-                car.Type = carType;
-
+                var car = _IOVehicles.InputCar(_brandRepository);
                 _vehicles.Add(car);
+            }
+            else if (vehicleType is "motorbike")
+            {
+                var motorbike = _IOVehicles.InputMotorbike(_brandRepository);
+                _vehicles.Add(motorbike);
             }
             else
             {
-                var motorbike = new Motorbike();
-                GetVehicleInput(motorbike);
-
-                Console.WriteLine("Enter the motorbike's speed");
-                motorbike.Speed = int.Parse(Console.ReadLine());
-
-                Console.WriteLine("Is the license required? Y/N");
-                motorbike.LicenseRequired = Console.ReadLine() switch
-                {
-                    "y" or "Y" or "yes" or "Yes" => true,
-                    "n" or "N" or "no" or "No" => false,
-                    _ => throw new InvalidOperationException()
-                };
-
-                _vehicles.Add(motorbike);
+                Console.WriteLine("Your object is kinda weird");
             }
         }
 
-        public void DeleteVehicle(string id)
+        public void DeleteVehicle(Guid id)
         {
-            if (!_vehicles.Any(v => v.Id == Guid.Parse(id)))
+            if (!_vehicles.Any(v => v.Id == id))
             {
-                throw new ArgumentNullException(nameof(id));
+                Console.WriteLine("Cannot find such id!");
             }
 
-            _vehicles.Remove(GetVehicle(Guid.Parse(id)));
+            var vehicleToRemove = _vehicles.FirstOrDefault(v => v.Id == id);
+
+            _vehicles.Remove(vehicleToRemove);
             RemoveFromFile(id.ToString());
         }
 
@@ -122,8 +109,9 @@ namespace VehicleManagement.Services
             }
         }
 
-        public void ShowVehicleList(string showType)
+        public void ShowVehicleList()
         {
+            var showType = _IOVehicles.GetShowType();
             if (showType is "0")
             {
                 ShowAllVehicle();
@@ -132,7 +120,10 @@ namespace VehicleManagement.Services
             {
                 ShowVehiclesDescending();
             }
-            else Console.WriteLine(showType);
+            else
+            {
+                Console.WriteLine(showType);
+            }
         }
 
         private void ShowAllVehicle()
@@ -147,7 +138,15 @@ namespace VehicleManagement.Services
 
             foreach (var line in textToPrint)
             {
-                Console.WriteLine(line.ToString());
+                if (line is Motorbike)
+                {
+                    Console.WriteLine(line.ToString());
+                    ((Motorbike)line).MakeSound();
+                }
+                else 
+                { 
+                    Console.WriteLine(line.ToString()); 
+                }
             }
         }
 
@@ -164,84 +163,45 @@ namespace VehicleManagement.Services
             }
         }
 
-        public bool UpdateVehicle(string id)
+        public bool UpdateVehicle(Guid id)
         {
-            var vehicle = GetVehicle(Guid.Parse(id));
-
-            if (vehicle is null)
+            if (!_vehicles.Any(v => v.Id == id))
             {
-                Console.WriteLine("The vehicle does not exist");
                 return false;
             }
 
-            if (vehicle is Car)
-            {
-                Console.WriteLine($"What information do you want to update? Name/Color/Price/Brand/Year of manufacture/Car type");
-            }
-            else if (vehicle is Motorbike)
-            {
-                Console.WriteLine($"What information do you want to update? Name/Color/Price/Brand/Speed/Require license?");
-            }
-            else
-            {
-                Console.WriteLine($"What information do you want to update? Name/Color/Price/Brand");
-            }
+            var vehicleToUpdate = GetVehicle(id);
+            string propertyToChange, newPropertyValue;
 
-            string propertyToChange = Console.ReadLine();
-            Console.Write("New value:");
-            string newPropertyValue = Console.ReadLine();
+            (propertyToChange, newPropertyValue) = _IOVehicles.GetPropertyToChange(vehicleToUpdate);
 
-            vehicle.ChangeProperty(propertyToChange, newPropertyValue);
+            vehicleToUpdate.ChangeProperty(propertyToChange, newPropertyValue, _brandRepository);
 
             return true;
 
         }
 
-        private Vehicle GetVehicleInput(Vehicle vehicle)
-        {
-            Console.Write("Input vehicle name: ");
-            vehicle.Name = Console.ReadLine();
-
-            Console.Write("Input vehicle color between Red/Green/Blue: ");
-            if (!Enum.TryParse(Console.ReadLine(), out Color color))
-            {
-                throw new ArgumentNullException(nameof(color));
-            }
-            vehicle.Color = color;
-
-            Console.Write("Input vehicle Price: ");
-            vehicle.Price = decimal.Parse(Console.ReadLine());
-
-            Console.Write("Input vehicle brand: ");
-            if (!Enum.TryParse(Console.ReadLine(), out Brand brand))
-            {
-                throw new ArgumentNullException(nameof(brand));
-            }
-            vehicle.Brand = brand;
-
-            return vehicle;
-        }
-
         public void LoadData()
         {
             StreamReader data = new StreamReader(filePath);
-            string? line;
+            string line;
             while ((line = data.ReadLine()) is not null)
             {
-                string[] words = line.Split('-');
-                if (words.Any(w => w.Trim() == "YearOfManufacture"))
+                string[] words = line.Split(" -");
+                if (words.Any(w => w.Trim() == "True" || w.Trim() == "False"))
                 {
-                    _vehicles.AddCar(words);
+                    _vehicles.AddMotorbike(words, _brandRepository);
                 }
                 else
                 {
-                    _vehicles.AddMotorbike(words);
+                    _vehicles.AddCar(words, _brandRepository);
                 }
             }
         }
 
-        public void SearchVehicle(string searchType)
+        public void SearchVehicle()
         {
+            var searchType = _IOVehicles.GetSearchType();
             if (searchType is "name")
             {
                 SearchVehicleByName();
@@ -252,7 +212,7 @@ namespace VehicleManagement.Services
             }
             else
             {
-                Console.WriteLine("Wrong input");
+                Console.WriteLine(searchType);
             }
         }
 
@@ -260,13 +220,5 @@ namespace VehicleManagement.Services
         {
             File.WriteAllLines(filePath, File.ReadAllLines(filePath).Where(l => !l.Contains(id)));
         }
-
-
-            //private string GetVehicleType(Vehicle vehicle)
-            //{
-            //    if (vehicle.ToString().Contains("YearOfManuFacture"))
-            //        return "car";
-            //    return "motorbike";
-            //}
     }
 }
