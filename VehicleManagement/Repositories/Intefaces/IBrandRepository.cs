@@ -1,6 +1,6 @@
 ﻿using VehicleManagement.Entities;
 
-namespace VehicleManagement.Services
+namespace VehicleManagement.Repositories.Interfaces
 {
     internal interface IBrandRepository
     {

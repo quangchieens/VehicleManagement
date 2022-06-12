@@ -1,5 +1,7 @@
 ﻿
 using System;
+using VehicleManagement.Repositories.Implementations;
+using VehicleManagement.Repositories.Interfaces;
 using VehicleManagement.Services;
 
 namespace VehicleManagement
@@ -8,9 +10,11 @@ namespace VehicleManagement
     {
         static void Main(string[] args)
         {
-            const string file = "vehicles.txt";
-            IVehicleRepository repo = new InMemoryVehicleRepository(file);
-            var IOVehicles = new IOVehicles();
+            var brandRepository = new BrandRepository();
+            var repo = new InMemoryVehicleRepository(brandRepository);
+            var input = new Input(repo, brandRepository);
+            var fileAccessObject = new FileAccessObject(repo, brandRepository);
+            var consoleService = new ConsoleService(repo, fileAccessObject);
             var menu = new Menu();
             int choice;
 
@@ -18,33 +22,40 @@ namespace VehicleManagement
             {
                 menu.ShowMenu();
                 choice = int.Parse(Console.ReadLine());
-                
+
                 switch (choice)
                 {
                     case 1:
-                        repo.LoadData();
+                        //Get data from file
+                        fileAccessObject.LoadDataFromFile();
                         break;
                     case 2:
-                        repo.AddVehicle();
+                        menu.AddVehicle();
+                        var vehicleToAdd = input.GetVehicleToManipulate();
+                        consoleService.AddVehicle(vehicleToAdd);
                         break;
                     case 3:
-                        Guid idToUpdate = IOVehicles.GetId();
-                        repo.UpdateVehicle(idToUpdate);
+                        menu.UpdateVehicle();
+                        var updateData = input.GetUpdateVehicleInformation();
+                        consoleService.UpdateVehicle(updateData);
                         break;
                     case 4:
-                        Guid idToDelete = IOVehicles.GetId();
-                        repo.DeleteVehicle(idToDelete);
+                        menu.DeleteVehicle();
+                        var idToDelete = input.GetId();
+                        consoleService.DeleteVehicle(idToDelete);
                         break;
                     case 5:
                         menu.SearchVehicleSubmenu();
-                        repo.SearchVehicle();
+                        var searchType = input.GetSearchType();
+                        consoleService.SearchVehicle(searchType);
                         break;
                     case 6:
                         menu.ShowVehicleListSubmenu();
-                        repo.ShowVehicleList();
+                        var printType = input.GetPrintType();
+                        consoleService.ShowVehicle(printType);
                         break;
                     case 7:
-                        repo.StoreData();
+                        fileAccessObject.StoreDataToFile();
                         break;
                 }
             } while (true);

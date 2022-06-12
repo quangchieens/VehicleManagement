@@ -1,19 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using VehicleManagement.Entities;
+using VehicleManagement.Repositories.Interfaces;
 
-namespace VehicleManagement.Services
+namespace VehicleManagement.Repositories.Implementations
 {
     internal class BrandRepository : IBrandRepository
     {
-        private readonly List<Brand> _brandRepository;
+        private readonly List<Brand> _brands;
         public BrandRepository()
         {
-            _brandRepository = new List<Brand>();
+            _brands = new List<Brand>();
+            AddBrand("Maybach");
+            AddBrand("Ford");
         }
         public void AddBrand(string name)
         {
-            _brandRepository.Add(new Brand() { Name = name });
+            _brands.Add(new Brand() { Name = name });
         }
 
         public Brand CheckBrand(string name)
@@ -27,7 +29,7 @@ namespace VehicleManagement.Services
 
         public Brand GetBrand(string name)
         {
-            return _brandRepository.Find(b => b.Name == name);
+            return _brands.Find(b => b.Name == name);
         }
     }
 }

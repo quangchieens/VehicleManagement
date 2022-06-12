@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using VehicleManagement.Entities;
 using VehicleManagement.Entities.Enums;
+using VehicleManagement.Repositories.Interfaces;
 using VehicleManagement.Services;
 
 namespace VehicleManagement.Helpers
@@ -27,9 +28,9 @@ namespace VehicleManagement.Helpers
                             null);
         }
 
-        public static void AddCar(this List<Vehicle> vehicles, string[] words, IBrandRepository brandRepository)
+        public static void AddCar(this IVehicleRepository vehicleRepository, string[] words, IBrandRepository brandRepository)
         {
-            vehicles.Add(new Car
+            vehicleRepository.AddVehicle(new Car
             {
                 Id = Guid.Parse(words[0].Trim()),
                 Name = words[1].Trim(),
@@ -41,9 +42,9 @@ namespace VehicleManagement.Helpers
             });
         }
 
-        public static void AddMotorbike(this List<Vehicle> vehicles, string[] words, IBrandRepository brandRepository)
+        public static void AddMotorbike(this IVehicleRepository vehicleRepository, string[] words, IBrandRepository brandRepository)
         {
-            vehicles.Add(new Motorbike
+            vehicleRepository.AddVehicle(new Motorbike
             {
                 Id = Guid.Parse(words[0].Trim()),
                 Name = words[1].Trim(),

@@ -1,11 +1,20 @@
 ﻿using System;
+using System.Reflection;
 using VehicleManagement.Entities;
 using VehicleManagement.Entities.Enums;
+using VehicleManagement.Repositories.Interfaces;
 
 namespace VehicleManagement.Services
 {
-    internal class IOVehicles
+    internal class Input
     {
+        private readonly IVehicleRepository _vehicleRepository;
+        private readonly IBrandRepository _brandRepository;
+        public Input(IVehicleRepository vehicleRepository, IBrandRepository brandRepository)
+        {
+            _vehicleRepository = vehicleRepository;
+            _brandRepository = brandRepository;
+        }
         public string GetVehicleType()
         {
             Console.WriteLine("Is your vehicle a Car or a Motorbike? 0: Car, 1: Motorbike");
@@ -22,11 +31,13 @@ namespace VehicleManagement.Services
             }
         }
 
-        public Car InputCar(IBrandRepository brandRepository)
+        private Car InputCar(Vehicle vehicle)
         {
-            var car = new Car();
-            GetVehicleInput(car, brandRepository);
-
+            var car = new Car() { Id = vehicle.Id, 
+                                Brand = vehicle.Brand,
+                                Color = vehicle.Color,
+                                Name = vehicle.Name,
+                                Price = vehicle.Price};
             Console.WriteLine("Enter the year of manufacture: ");
             car.YearOfManufacture = int.Parse(Console.ReadLine());
 
@@ -43,16 +54,27 @@ namespace VehicleManagement.Services
         public Guid GetId()
         {
             Console.Write("Input the vehicle id: ");
-            Guid.TryParse(Console.ReadLine(), out Guid id);
-
-            return id;
+            if (Guid.TryParse(Console.ReadLine(), out Guid id))
+            {
+                return id;
+            }
+            else
+            {
+                return Guid.Empty;
+            }
         }
 
-        public Motorbike InputMotorbike(IBrandRepository brandRepository)
+        private Motorbike InputMotorbike(Vehicle vehicle)
         {
-            var motorbike = new Motorbike();
-            GetVehicleInput(motorbike, brandRepository);
 
+            var motorbike = new Motorbike()
+            {
+                Id = vehicle.Id,
+                Brand = vehicle.Brand,
+                Color = vehicle.Color,
+                Name = vehicle.Name,
+                Price = vehicle.Price
+            };
             Console.WriteLine("Enter the motorbike's speed");
             motorbike.Speed = int.Parse(Console.ReadLine());
 
@@ -67,8 +89,10 @@ namespace VehicleManagement.Services
             return motorbike;
         }
 
-        private Vehicle GetVehicleInput(Vehicle vehicle, IBrandRepository brandRepository)
+        public Vehicle GetVehicleToManipulate()
         {
+            var vehicleType = GetVehicleType();
+            var vehicle = new Vehicle();
             Console.Write("Input vehicle name: ");
             vehicle.Name = Console.ReadLine();
 
@@ -84,33 +108,62 @@ namespace VehicleManagement.Services
 
             Console.Write("Input vehicle brand: ");
             var brand = Console.ReadLine();
-            vehicle.Brand = brandRepository.CheckBrand(brand);
+            vehicle.Brand = _brandRepository.CheckBrand(brand);
 
-            return vehicle;
+            if (vehicleType == "car")
+            {
+                return InputCar(vehicle);
+            }
+            else if (vehicleType == "motorbike")
+            {
+                return InputMotorbike(vehicle);
+            } 
+            else
+            {
+                Console.WriteLine("Your vehicle should go extinct");
+                return null;
+            }
         }
 
-        public (string propertyToChange, string newPropertyValue) GetPropertyToChange(Vehicle vehicle)
+        public Vehicle GetUpdateVehicleInformation()
         {
+            Console.Write("Input the id for which vehicle you want to update: ");
+            if (!Guid.TryParse(Console.ReadLine(), out Guid id))
+            {
+                return null;
+            }
+
+            var vehicle = _vehicleRepository.GetVehicle(id);
+
+            Vehicle vehicleToUpdate;
+
             if (vehicle is Car)
             {
-                Console.WriteLine($"What information do you want to update? Name/Color/Price/Brand/Year of manufacture/Car type");
-            }
-            else if (vehicle is Motorbike)
-            {
-                Console.WriteLine($"What information do you want to update? Name/Color/Price/Brand/Speed/Require license?");
+                vehicleToUpdate = new Car();
             }
             else
             {
-                Console.WriteLine($"What information do you want to update? Name/Color/Price/Brand");
+                vehicleToUpdate = new Motorbike();
             }
 
-            string propertyToChange = Console.ReadLine();
-            Console.Write("New value:");
-            string newPropertyValue = Console.ReadLine();
-            return (propertyToChange, newPropertyValue);
+            foreach (var property in vehicleToUpdate.GetType().GetProperties())
+            {
+                var value = property.GetValue(vehicle, null);
+                Console.WriteLine($"New value for {value}: NewValue/No");
+                string choice = Console.ReadLine();
+                if (choice is "No" or "no" or "NO")
+                {
+                    continue;
+                }
+                else
+                {
+                    property.SetValue(choice, value);
+                }   
+            }
+            return vehicleToUpdate;
         }
 
-        public string GetShowType()
+        public string GetPrintType()
         {
             string input = Console.ReadLine();
 
