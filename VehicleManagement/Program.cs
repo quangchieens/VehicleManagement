@@ -1,61 +1,58 @@
-﻿
-using System;
+﻿using System;
 using VehicleManagement.Repositories.Implementations;
-using VehicleManagement.Repositories.Interfaces;
-using VehicleManagement.Services;
+using VehicleManagement.Services.Implementations;
+using VehicleManagement.Services.Interfaces;
+using VehicleManagement.Views;
 
 namespace VehicleManagement
 {
-    internal class Program
+    public class Program
     {
         static void Main(string[] args)
         {
             var brandRepository = new BrandRepository();
             var repo = new InMemoryVehicleRepository(brandRepository);
-            var input = new Input(repo, brandRepository);
-            var fileAccessObject = new FileAccessObject(repo, brandRepository);
-            var consoleService = new ConsoleService(repo, fileAccessObject);
-            var menu = new Menu();
-            int choice;
+            IFileService fileService = new FileService(repo, brandRepository);
+            IVehicleService vehicleService = new VehicleService(repo);
 
             do
             {
-                menu.ShowMenu();
-                choice = int.Parse(Console.ReadLine());
+                Menu.ShowMenu();
+                var choice = int.Parse(Console.ReadLine() ?? string.Empty);
 
                 switch (choice)
                 {
                     case 1:
                         //Get data from file
-                        fileAccessObject.LoadDataFromFile();
+                        fileService.LoadDataFromFile();
                         break;
                     case 2:
-                        menu.AddVehicle();
-                        var vehicleToAdd = input.GetVehicleToManipulate();
-                        consoleService.AddVehicle(vehicleToAdd);
+                        Menu.AddVehicle();
+                        var vehicleToAdd = Input.GetVehicleToManipulate(brandRepository);
+                        vehicleService.AddVehicle(vehicleToAdd);
                         break;
                     case 3:
-                        menu.UpdateVehicle();
-                        var updateData = input.GetUpdateVehicleInformation();
-                        consoleService.UpdateVehicle(updateData);
+                        Menu.UpdateVehicle();
+                        var updateData = Input.GetUpdateVehicleInformation(repo, brandRepository);
+                        vehicleService.UpdateVehicle(updateData);
                         break;
                     case 4:
-                        menu.DeleteVehicle();
-                        var idToDelete = input.GetId();
-                        consoleService.DeleteVehicle(idToDelete);
+                        Menu.DeleteVehicle();
+                        var idToDelete = Input.GetId();
+                        vehicleService.DeleteVehicle(idToDelete);
                         break;
                     case 5:
-                        menu.SearchVehicleSubmenu();
-                        var searchType = input.GetSearchType();
-                        consoleService.SearchVehicle(searchType);
+                        Menu.SearchVehicleSubmenu();
+                        var searchType = Input.GetSearchType();
+                        vehicleService.SearchVehicle(searchType);
                         break;
                     case 6:
-                        menu.ShowVehicleListSubmenu();
-                        var printType = input.GetPrintType();
-                        consoleService.ShowVehicle(printType);
+                        Menu.ShowVehicleListSubmenu();
+                        var printType = Input.GetPrintType();
+                        vehicleService.ShowVehicle(printType);
                         break;
                     case 7:
-                        fileAccessObject.StoreDataToFile();
+                        fileService.StoreDataToFile();
                         break;
                 }
             } while (true);

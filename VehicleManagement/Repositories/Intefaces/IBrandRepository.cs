@@ -1,10 +1,9 @@
-﻿using VehicleManagement.Entities;
+﻿using VehicleManagement.Models;
 
 namespace VehicleManagement.Repositories.Interfaces
 {
-    internal interface IBrandRepository
+    public interface IBrandRepository
     {
-        public void AddBrand(string name);
         public Brand GetBrand(string name);
         public Brand CheckBrand(string name);
     }

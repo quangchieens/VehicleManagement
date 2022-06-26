@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using VehicleManagement.Entities;
-using VehicleManagement.Entities.Enums;
 using VehicleManagement.Helpers;
+using VehicleManagement.Models;
+using VehicleManagement.Models.Enums;
 using VehicleManagement.Repositories.Interfaces;
-using VehicleManagement.Services;
 
 namespace VehicleManagement.Repositories.Implementations
 {
-    internal class InMemoryVehicleRepository : IVehicleRepository
+    public class InMemoryVehicleRepository : IVehicleRepository
     {
         private readonly List<Vehicle> _vehicles;
         private readonly IBrandRepository _brandRepository;
@@ -20,40 +18,32 @@ namespace VehicleManagement.Repositories.Implementations
             _brandRepository = brandRepository;
             _vehicles = new List<Vehicle>()
             {
-                new Car() { Name = "Khoa", Brand = _brandRepository.GetBrand("Maybach"), Color = Color.Blue, Price = 234.234m, Type = CarType.Sport, YearOfManufacture = 2020 },
+                new Car() { Id = Guid.Parse("5b83df53-a6c6-4e75-a337-8eb9087a2c0e"), Name = "Khoa", Brand = _brandRepository.GetBrand("Maybach"), Color = Color.Blue, Price = 234.234m, Type = CarType.Sport, YearOfManufacture = 2020 },
                 new Motorbike() { Name = "Chien", Brand = _brandRepository.GetBrand("Ford"), Color = Color.Red, Price = 23423414.32m, LicenseRequired = true, Speed = 220 }
             };
         }
-        public List<Vehicle> GetVehicles(Func<Vehicle, bool>? predicate)
-        {
-            return _vehicles.Where(predicate).ToList();
-        }
-        public Vehicle GetVehicle(Guid id)
-        {
-            return _vehicles.FirstOrDefault(v => v.Id == id);
-        }
-
-        public void AddVehicle(Vehicle vehicleToAdd)
+        public bool AddVehicle(Vehicle vehicleToAdd)
         {
             _vehicles.Add(vehicleToAdd);
+            return true;
+            //not handle false case because of simple execution
         }
-
-        public void DeleteVehicle(Guid id)
+        public bool DeleteVehicle(Guid id)
         {
-            if (!_vehicles.Any(v => v.Id == id))
+            if (_vehicles.All(v => v.Id != id))
             {
                 Console.WriteLine("Cannot find such id!");
-                return;
+                return false;
             }
 
             var vehicleToRemove = _vehicles.FirstOrDefault(v => v.Id == id);
 
             _vehicles.Remove(vehicleToRemove);
+            return true;
         }
-
         public bool UpdateVehicle(Vehicle updateData)
         {
-            if (!_vehicles.Any(v => v.Id == updateData.Id))
+            if (_vehicles.All(v => v.Id != updateData.Id))
             {
                 return false;
             }
@@ -62,28 +52,25 @@ namespace VehicleManagement.Repositories.Implementations
 
             foreach (var property in updateData.GetType().GetProperties())
             {
-                if (property is not null)
-                {
-                    string value = (string)property.GetValue(updateData, null);
-                    vehicleToUpdate.ChangeProperty(property.Name, value, _brandRepository);
-                }
+                var value = property.GetValue(updateData, null)?.ToString();
+                vehicleToUpdate.ChangeProperty(property.Name, value, _brandRepository);
             }
 
             return true;
         }
-
-        private void RemoveFromFile(string id)
+        public Vehicle GetVehicle(Guid id)
         {
-            var FilePath = Constants.FileDirectory + Constants.FileName;
-            File.WriteAllLines(FilePath, File.ReadAllLines(FilePath).Where(l => !l.Contains(id)));
+            return _vehicles.FirstOrDefault(v => v.Id == id);
         }
-
         public List<Vehicle> GetVehicles()
         {
             return _vehicles;
         }
-
-        public List<Vehicle> SortVehicles<TKey>(Func<Vehicle, TKey> keySelector)
+        public List<Vehicle> GetVehicles(Func<Vehicle, bool> predicate)
+        {
+            return _vehicles.Where(predicate).ToList();
+        }
+        public List<Vehicle> GetSortedVehicles<TKey>(Func<Vehicle, TKey> keySelector)
         {
             return _vehicles.OrderByDescending(keySelector).ToList();
         }

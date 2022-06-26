@@ -1,21 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using VehicleManagement.Entities;
-using VehicleManagement.Entities.Enums;
+using VehicleManagement.Models;
+using VehicleManagement.Models.Enums;
 using VehicleManagement.Repositories.Interfaces;
-using VehicleManagement.Services;
 
 namespace VehicleManagement.Helpers
 {
     internal static class VehicleExtensions
-    {
+    {   
         public static void ChangeProperty (this Vehicle vehicle, string propertyToChange, string newPropertyValue, IBrandRepository brandRepository)
         {
             vehicle.GetType()
                 .GetProperty(propertyToChange)
-                .SetValue(vehicle,
-                            newPropertyValue switch
+                ?.SetValue(vehicle,
+                            propertyToChange switch
                             {
+                                "Id" => Guid.Parse(newPropertyValue),
                                 "Name" => newPropertyValue,
                                 "Color" => Enum.Parse<Color>(newPropertyValue),
                                 "Price" => decimal.Parse(newPropertyValue),

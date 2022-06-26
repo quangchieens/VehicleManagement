@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using VehicleManagement.Entities;
+using VehicleManagement.Models;
 
 namespace VehicleManagement.Repositories.Interfaces
 {
-    internal interface IVehicleRepository
+    public interface IVehicleRepository
     {
-        public void AddVehicle(Vehicle vehicleToAdd);
+        public bool AddVehicle(Vehicle vehicleToAdd);
         public bool UpdateVehicle(Vehicle updateData);
-        public void DeleteVehicle(Guid id);
+        public bool DeleteVehicle(Guid id);
         public Vehicle GetVehicle(Guid id);
         public List<Vehicle> GetVehicles();
         public List<Vehicle> GetVehicles(Func<Vehicle, bool> predicate);
-        public List<Vehicle> SortVehicles<TKey>(Func<Vehicle, TKey> keySelector);
+        public List<Vehicle> GetSortedVehicles<TKey>(Func<Vehicle, TKey> keySelector);
     }
 }

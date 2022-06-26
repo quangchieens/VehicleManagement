@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using VehicleManagement.Entities;
+using VehicleManagement.Models;
 using VehicleManagement.Repositories.Interfaces;
 
 namespace VehicleManagement.Repositories.Implementations
 {
-    internal class BrandRepository : IBrandRepository
+    public class BrandRepository : IBrandRepository
     {
         private readonly List<Brand> _brands;
         public BrandRepository()
@@ -13,9 +13,12 @@ namespace VehicleManagement.Repositories.Implementations
             AddBrand("Maybach");
             AddBrand("Ford");
         }
-        public void AddBrand(string name)
+        private bool AddBrand(string name)
         {
+            if (name is null) return false;
             _brands.Add(new Brand() { Name = name });
+            return true;
+
         }
 
         public Brand CheckBrand(string name)
